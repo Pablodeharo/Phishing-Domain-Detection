@@ -163,8 +163,6 @@ def main():
     st.title('Detector de Phishing')
     logging.info("Título mostrado")
     
-    st.title('Detector de Phishing')
-
     add_banner_and_links()
 
     url = st.text_input('Introduce la URL a analizar:')
