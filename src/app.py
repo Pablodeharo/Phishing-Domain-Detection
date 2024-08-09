@@ -17,57 +17,64 @@ st.write("Contents of current directory:", os.listdir())
 
 @st.cache_resource
 def load_model_and_scaler():
-    rf_model = joblib.load("random_forest_phishing_model.joblib")
-    scaler = joblib.load("scaler.joblib")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    rf_model = joblib.load(os.path.join(current_dir, "random_forest_phishing_model.joblib"))
+    scaler = joblib.load(os.path.join(current_dir, "scaler.joblib"))
     return rf_model, scaler
 
 rf_model, scaler = load_model_and_scaler()
 
 def extract_features(url):
-    features = {}
-    parsed_url = urlparse(url)
-    extract = tldextract.extract(url)
+    features = {
+        'length_url': 0,
+        'directory_length': 0,
+        'qty_slash_directory': 0,
+        'qty_dot_file': 0,
+        'domain_length': 0,
+        'qty_dot_directory': 0,
+        'qty_hyphen_directory': 0,
+        'qty_at_directory': 0,
+        'qty_and_directory': 0,
+        'qty_comma_directory': 0,
+        'qty_percent_directory': 0,
+        'qty_dollar_directory': 0,
+        'qty_slash_url': 0,
+        'time_response': -1,
+        'asn_ip': -1,
+        'ttl_hostname': -1,
+        'time_domain_activation': -1,
+        'time_domain_expiration': -1,
+        'file_length': 0,
+        'qty_dollar_file': 0
+    }
 
-    # Longitud de la URL
-    features['length_url'] = len(url)
-
-    # Longitud del directorio
-    features['directory_length'] = len(parsed_url.path)
-
-    # Cantidad de slashes en el directorio
-    features['qty_slash_directory'] = parsed_url.path.count('/')
-
-    # Cantidad de puntos en el archivo
-    features['qty_dot_file'] = len(re.findall(r'\.[^./]+$', parsed_url.path))
-
-    # Longitud del dominio
-    features['domain_length'] = len(extract.domain)
-
-    # Otras características que podemos extraer directamente de la URL
-    features['qty_dot_directory'] = parsed_url.path.count('.')
-    features['qty_hyphen_directory'] = parsed_url.path.count('-')
-    features['qty_at_directory'] = parsed_url.path.count('@')
-    features['qty_and_directory'] = parsed_url.path.count('&')
-    features['qty_comma_directory'] = parsed_url.path.count(',')
-    features['qty_percent_directory'] = parsed_url.path.count('%')
-    features['qty_dollar_directory'] = parsed_url.path.count('$')
-    features['qty_slash_url'] = url.count('/')
-
-    # Características que requieren solicitudes HTTP (ten cuidado con esto en producción)
     try:
-        response = requests.get(url, timeout=5)
-        features['time_response'] = response.elapsed.total_seconds()
-        features['asn_ip'] = 0  # Esto requeriría una base de datos de ASN
-        features['ttl_hostname'] = 0  # Esto requeriría una consulta DNS
-    except:
-        features['time_response'] = -1
-        features['asn_ip'] = -1
-        features['ttl_hostname'] = -1
+        parsed_url = urlparse(url)
+        extract = tldextract.extract(url)
 
-    # Características que no podemos extraer fácilmente (usaremos valores predeterminados)
-    features['time_domain_activation'] = -1
-    features['time_domain_expiration'] = -1
-    features['file_length'] = 0
+        features['length_url'] = len(url)
+        features['directory_length'] = len(parsed_url.path)
+        features['qty_slash_directory'] = parsed_url.path.count('/')
+        features['qty_dot_file'] = len(re.findall(r'\.[^./]+$', parsed_url.path))
+        features['domain_length'] = len(extract.domain)
+        features['qty_dot_directory'] = parsed_url.path.count('.')
+        features['qty_hyphen_directory'] = parsed_url.path.count('-')
+        features['qty_at_directory'] = parsed_url.path.count('@')
+        features['qty_and_directory'] = parsed_url.path.count('&')
+        features['qty_comma_directory'] = parsed_url.path.count(',')
+        features['qty_percent_directory'] = parsed_url.path.count('%')
+        features['qty_dollar_directory'] = parsed_url.path.count('$')
+        features['qty_slash_url'] = url.count('/')
+        features['qty_dollar_file'] = parsed_url.path.count('$')
+
+        try:
+            response = requests.get(url, timeout=5)
+            features['time_response'] = response.elapsed.total_seconds()
+        except:
+            pass  # Mantener el valor predeterminado si la solicitud falla
+
+    except Exception as e:
+        st.warning(f"No se pudieron extraer todas las características de la URL: {str(e)}")
 
     return pd.DataFrame([features])
 
@@ -146,6 +153,11 @@ def main():
         if url:
             try:
                 input_data = extract_features(url)
+                
+                # Asegúrate de que las columnas estén en el orden correcto
+                expected_columns = scaler.feature_names_in_
+                input_data = input_data.reindex(columns=expected_columns, fill_value=0)
+                
                 scaled_input = scaler.transform(input_data)
                 prediction = rf_model.predict(scaled_input)
                 proba = rf_model.predict_proba(scaled_input)
@@ -161,7 +173,10 @@ def main():
                     st.write(input_data)
             except Exception as e:
                 st.error(f"Error al procesar la URL: {str(e)}")
-                st.write("Detalles del error:", e)
+                st.write("Tipo de error:", type(e).__name__)
+                st.write("Detalles del error:", str(e))
+                import traceback
+                st.write("Traceback:", traceback.format_exc())
         else:
             st.warning('Por favor, introduce una URL.')
 
