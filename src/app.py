@@ -8,6 +8,15 @@ import os
 import base64
 from importlib import resources
 import tldextract
+import requests
+
+@st.cache_resource
+def load_model_and_scaler():
+    rf_model = joblib.load("random_forest_phishing_model.joblib")
+    scaler = joblib.load("scaler.joblib")
+    return rf_model, scaler
+
+rf_model, scaler = load_model_and_scaler()
 
 def extract_features(url):
     features = {}
@@ -55,7 +64,7 @@ def extract_features(url):
     features['time_domain_expiration'] = -1
     features['file_length'] = 0
 
-    return features
+     return pd.DataFrame([features])
 
 def add_banner_and_links():
     # Lista de posibles rutas para el banner
@@ -124,36 +133,30 @@ def add_banner_and_links():
 def main():
     st.title('Detector de Phishing')
 
-    # Añadir el banner y los enlaces al principio
     add_banner_and_links()
 
-    # Input para la URL
     url = st.text_input('Introduce la URL a analizar:')
 
     if st.button('Predecir'):
         if url:
-            # Extraer características
-            input_data = extract_features(url)
+            try:
+                input_data = extract_features(url)
+                scaled_input = scaler.transform(input_data)
+                prediction = rf_model.predict(scaled_input)
+                proba = rf_model.predict_proba(scaled_input)
 
-            # Aplicar el scaling
-            scaled_input = scaler.transform(input_data)
+                if prediction[0] == 1:
+                    st.error('Esta URL es probablemente phishing.')
+                else:
+                    st.success('Esta URL parece ser legítima.')
 
-            # Hacer la predicción
-            prediction = rf_model.predict(scaled_input)
+                st.write(f'Probabilidad de phishing: {proba[0][1]:.2%}')
 
-            # Mostrar el resultado
-            if prediction[0] == 1:
-                st.error('Esta URL es probablemente phishing.')
-            else:
-                st.success('Esta URL parece ser legítima.')
-
-            # Mostrar la probabilidad
-            proba = rf_model.predict_proba(scaled_input)
-            st.write(f'Probabilidad de phishing: {proba[0][1]:.2%}')
-
-            # Mostrar las características extraídas (opcional)
-            if st.checkbox('Mostrar características extraídas'):
-                st.write(input_data)
+                if st.checkbox('Mostrar características extraídas'):
+                    st.write(input_data)
+            except Exception as e:
+                st.error(f"Error al procesar la URL: {str(e)}")
+                st.write("Detalles del error:", e)
         else:
             st.warning('Por favor, introduce una URL.')
 
