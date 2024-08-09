@@ -9,7 +9,7 @@ import base64
 
 def add_personal_banner():
     # Ruta específica a tu banner
-    image_path = r"C:\Users\lenovo\Desktop\Phishing Domain Detection\Phishing Domain Detection\src\assets\banner.jpeg"
+    image_path = "assets/banner.jpeg"
     
     # Verifica si la imagen existe
     if os.path.exists(image_path):
