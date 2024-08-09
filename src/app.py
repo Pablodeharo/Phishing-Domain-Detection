@@ -72,7 +72,6 @@ def add_banner_and_links():
                     image_bytes = f.read()
                 st.image(image_bytes, use_column_width=True)
                 banner_found = True
-                st.success(f"Banner cargado desde: {path}")
                 break
             except Exception as e:
                 pass
