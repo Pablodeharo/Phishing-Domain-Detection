@@ -11,6 +11,7 @@ import tldextract
 import requests
 import sys
 import logging
+import traceback
 
 #st.write("Python version:", sys.version)
 #st.write("Current working directory:", os.getcwd())
@@ -159,44 +160,63 @@ def add_banner_and_links():
 
 logging.basicConfig(level=logging.INFO)
 def main():
-    logging.info("Iniciando la aplicación")
-    st.title('Detector de Phishing')
-    logging.info("Título mostrado")
-    
-    add_banner_and_links()
+    try:
+        logging.info("Iniciando la aplicación")
+        st.title('Detector de Phishing')
+        logging.info("Título mostrado")
 
-    url = st.text_input('Introduce la URL a analizar:')
+        # Información de depuración
+        st.write("Python version:", sys.version)
+        st.write("Current working directory:", os.getcwd())
+        st.write("Contents of current directory:", os.listdir())
 
-    if st.button('Predecir'):
-        if url:
-            try:
-                input_data = extract_features(url)
-                
-                # Asegúrate de que las columnas estén en el orden correcto
-                expected_columns = scaler.feature_names_in_
-                input_data = input_data.reindex(columns=expected_columns, fill_value=0)
-                
-                scaled_input = scaler.transform(input_data)
-                prediction = rf_model.predict(scaled_input)
-                proba = rf_model.predict_proba(scaled_input)
+        add_banner_and_links()
 
-                if prediction[0] == 1:
-                    st.error('Esta URL es probablemente phishing.')
-                else:
-                    st.success('Esta URL parece ser legítima.')
+        url = st.text_input('Introduce la URL a analizar:')
 
-                st.write(f'Probabilidad de phishing: {proba[0][1]:.2%}')
+        if st.button('Predecir'):
+            if url:
+                try:
+                    input_data = extract_features(url)
+                    
+                    # Verifica si el scaler está cargado correctamente
+                    if 'scaler' not in globals():
+                        raise Exception("El scaler no está cargado correctamente")
 
-                if st.checkbox('Mostrar características extraídas'):
-                    st.write(input_data)
-            except Exception as e:
-                st.error(f"Error al procesar la URL: {str(e)}")
-                st.write("Tipo de error:", type(e).__name__)
-                st.write("Detalles del error:", str(e))
-                import traceback
-                st.write("Traceback:", traceback.format_exc())
-        else:
-            st.warning('Por favor, introduce una URL.')
-    logging.info("Aplicación cargada completamente")
+                    expected_columns = scaler.feature_names_in_
+                    input_data = input_data.reindex(columns=expected_columns, fill_value=0)
+                    
+                    scaled_input = scaler.transform(input_data)
+
+                    # Verifica si el modelo está cargado correctamente
+                    if 'rf_model' not in globals():
+                        raise Exception("El modelo no está cargado correctamente")
+
+                    prediction = rf_model.predict(scaled_input)
+                    proba = rf_model.predict_proba(scaled_input)
+
+                    if prediction[0] == 1:
+                        st.error('Esta URL es probablemente phishing.')
+                    else:
+                        st.success('Esta URL parece ser legítima.')
+
+                    st.write(f'Probabilidad de phishing: {proba[0][1]:.2%}')
+
+                    if st.checkbox('Mostrar características extraídas'):
+                        st.write(input_data)
+                except Exception as e:
+                    st.error(f"Error al procesar la URL: {str(e)}")
+                    st.write("Tipo de error:", type(e).__name__)
+                    st.write("Detalles del error:", str(e))
+                    st.write("Traceback:", traceback.format_exc())
+                    logging.error(f"Error en el procesamiento: {str(e)}", exc_info=True)
+            else:
+                st.warning('Por favor, introduce una URL.')
+        
+        logging.info("Aplicación cargada completamente")
+    except Exception as e:
+        st.error(f"Error crítico en la aplicación: {str(e)}")
+        logging.error(f"Error crítico: {str(e)}", exc_info=True)
+
 if __name__ == '__main__':
     main()
