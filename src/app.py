@@ -75,7 +75,7 @@ def add_banner_and_links():
                 st.success(f"Banner cargado desde: {path}")
                 break
             except Exception as e:
-                st.error(f"Error al cargar la imagen desde {path}: {str(e)}")
+                pass
 
     if not banner_found:
         st.error("No se pudo encontrar o cargar el banner.")
