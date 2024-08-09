@@ -56,15 +56,36 @@ def extract_features(url):
     return features
 
 def add_banner_and_links():
-    # Ruta relativa a tu banner
-    image_path = os.path.join("assets", "banner.jpeg")
+    # Lista de posibles rutas para el banner
+    possible_paths = [
+        "assets/banner.jpeg",
+        "./assets/banner.jpeg",
+        "../assets/banner.jpeg",
+        os.path.join(os.path.dirname(__file__), "assets", "banner.jpeg")
+    ]
     
-    # Verifica si la imagen existe y muéstrala
-    if os.path.exists(image_path):
-        st.image(image_path, use_column_width=True)
-    else:
-        st.error(f"La imagen del banner no se encontró en la ruta: {image_path}")
-    
+    banner_found = False
+    for path in possible_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, "rb") as f:
+                    image_bytes = f.read()
+                st.image(image_bytes, use_column_width=True)
+                banner_found = True
+                st.success(f"Banner cargado desde: {path}")
+                break
+            except Exception as e:
+                st.error(f"Error al cargar la imagen desde {path}: {str(e)}")
+
+    if not banner_found:
+        st.error("No se pudo encontrar o cargar el banner.")
+        st.write("Directorio actual:", os.getcwd())
+        st.write("Contenido del directorio:", os.listdir())
+        if os.path.exists("assets"):
+            st.write("Contenido de assets:", os.listdir("assets"))
+        else:
+            st.write("La carpeta 'assets' no existe en el directorio actual.")
+
     # Crear tres columnas para los botones
     col1, col2, col3 = st.columns(3)
     
