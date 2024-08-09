@@ -9,6 +9,11 @@ import base64
 from importlib import resources
 import tldextract
 import requests
+import sys
+
+st.write("Python version:", sys.version)
+st.write("Current working directory:", os.getcwd())
+st.write("Contents of current directory:", os.listdir())
 
 @st.cache_resource
 def load_model_and_scaler():
