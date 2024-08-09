@@ -6,6 +6,8 @@ import re
 from urllib.parse import urlparse
 import os
 import base64
+from importlib import resources
+import tldextract
 
 def extract_features(url):
     features = {}
