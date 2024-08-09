@@ -57,11 +57,12 @@ def extract_features(url):
 
 def add_personal_banner_and_links():
     # Ruta relativa a tu banner
-    image_path = "assets/banner.jpeg"
+    image_path = os.path.join("assets", "banner.jpeg")
     
     # Imprime información de depuración
     st.write("Directorio de trabajo actual:", os.getcwd())
     st.write("Contenido del directorio:", os.listdir())
+    st.write("Contenido de assets:", os.listdir("assets") if os.path.exists("assets") else "Carpeta assets no encontrada")
     
     # Verifica si la imagen existe
     if os.path.exists(image_path):
@@ -98,6 +99,8 @@ def add_personal_banner_and_links():
         )
     else:
         st.error(f"La imagen del banner no se encontró en la ruta: {image_path}")
+        st.write("Archivos en la carpeta assets:", os.listdir("assets") if os.path.exists("assets") else "Carpeta assets no encontrada")
+
 
 def main():
     st.title('Detector de Phishing')
