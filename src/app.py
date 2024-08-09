@@ -10,19 +10,34 @@ from importlib import resources
 import tldextract
 import requests
 import sys
+import logging
 
 #st.write("Python version:", sys.version)
 #st.write("Current working directory:", os.getcwd())
 #st.write("Contents of current directory:", os.listdir())
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, "random_forest_phishing_model.joblib")
+scaler_path = os.path.join(current_dir, "scaler.joblib")
+
 @st.cache_resource
 def load_model_and_scaler():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    rf_model = joblib.load(os.path.join(current_dir, "random_forest_phishing_model.joblib"))
-    scaler = joblib.load(os.path.join(current_dir, "scaler.joblib"))
-    return rf_model, scaler
+    try:
+        rf_model = joblib.load(model_path)
+        scaler = joblib.load(scaler_path)
+        return rf_model, scaler
+    except Exception as e:
+        st.error(f"Error al cargar el modelo o el scaler: {str(e)}")
+        st.write("Ruta del modelo:", model_path)
+        st.write("Ruta del scaler:", scaler_path)
+        st.write("Contenido del directorio:", os.listdir(current_dir))
+        raise e
 
-rf_model, scaler = load_model_and_scaler()
+# Intenta cargar el modelo y el scaler
+try:
+    rf_model, scaler = load_model_and_scaler()
+except Exception as e:
+    st.error("No se pudo cargar el modelo o el scaler. Verifica los logs para más detalles.")
 
 def extract_features(url):
     features = {
@@ -142,7 +157,12 @@ def add_banner_and_links():
         st.markdown(notion_html, unsafe_allow_html=True)
 
 
+logging.basicConfig(level=logging.INFO)
 def main():
+    logging.info("Iniciando la aplicación")
+    st.title('Detector de Phishing')
+    logging.info("Título mostrado")
+    
     st.title('Detector de Phishing')
 
     add_banner_and_links()
@@ -179,6 +199,6 @@ def main():
                 st.write("Traceback:", traceback.format_exc())
         else:
             st.warning('Por favor, introduce una URL.')
-
+    logging.info("Aplicación cargada completamente")
 if __name__ == '__main__':
     main()
