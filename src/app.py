@@ -55,55 +55,55 @@ def extract_features(url):
 
     return features
 
-def add_personal_banner_and_links():
+def add_banner_and_links():
     # Ruta relativa a tu banner
     image_path = os.path.join("assets", "banner.jpeg")
     
-    # Imprime información de depuración
-    st.write("Directorio de trabajo actual:", os.getcwd())
-    st.write("Contenido del directorio:", os.listdir())
-    st.write("Contenido de assets:", os.listdir("assets") if os.path.exists("assets") else "Carpeta assets no encontrada")
-    
-    # Verifica si la imagen existe
+    # Verifica si la imagen existe y muéstrala
     if os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
-            img_data = base64.b64encode(img_file.read()).decode()
-        
-        st.markdown(
-            f"""
-            <style>
-            .banner {{
-                width: 100%;
-                margin-top: 20px;
-            }}
-            .links {{
-                display: flex;
-                justify-content: center;
-                gap: 20px;
-                margin-top: 10px;
-            }}
-            .links a {{
-                color: #4A4A4A;
-                text-decoration: none;
-                font-weight: bold;
-            }}
-            </style>
-            <img src="data:image/jpeg;base64,{img_data}" class="banner">
-            <div class="links">
-                <a href="https://tiny-citrine-a6e.notion.site/Phishing-Domain-Detection-a9c3c58fc27746b586d43352e4ebe075" target="_blank">Documentación</a>
-                <a href="https://www.linkedin.com/in/pablo-de-haro-pishoudt-0871972b6/" target="_blank">LinkedIn</a>
-                <a href="https://github.com/Pablodeharo" target="_blank">GitHub</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.image(image_path, use_column_width=True)
     else:
         st.error(f"La imagen del banner no se encontró en la ruta: {image_path}")
-        st.write("Archivos en la carpeta assets:", os.listdir("assets") if os.path.exists("assets") else "Carpeta assets no encontrada")
+    
+    # Crear tres columnas para los botones
+    col1, col2, col3 = st.columns(3)
+    
+    # Botón de GitHub
+    with col1:
+        github_html = f"""
+        <a href="https://github.com/Pablodeharo" target="_blank">
+            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30" height="30">
+            GitHub
+        </a>
+        """
+        st.markdown(github_html, unsafe_allow_html=True)
+    
+    # Botón de LinkedIn
+    with col2:
+        linkedin_html = f"""
+        <a href="https://www.linkedin.com/in/pablo-de-haro-pishoudt-0871972b6/" target="_blank">
+            <img src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" width="30" height="30">
+            LinkedIn
+        </a>
+        """
+        st.markdown(linkedin_html, unsafe_allow_html=True)
+    
+    # Botón de Documentación (Notion)
+    with col3:
+        notion_html = f"""
+        <a href="https://tiny-citrine-a6e.notion.site/Phishing-Domain-Detection-a9c3c58fc27746b586d43352e4ebe075" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" width="30" height="30">
+            Documentación
+        </a>
+        """
+        st.markdown(notion_html, unsafe_allow_html=True)
 
 
 def main():
     st.title('Detector de Phishing')
+
+    # Añadir el banner y los enlaces al principio
+    add_banner_and_links()
 
     # Input para la URL
     url = st.text_input('Introduce la URL a analizar:')
@@ -134,9 +134,6 @@ def main():
                 st.write(input_data)
         else:
             st.warning('Por favor, introduce una URL.')
-    
-    # Añadir el banner personal y los enlaces al final
-    add_personal_banner_and_links()
 
 if __name__ == '__main__':
     main()
