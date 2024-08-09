@@ -64,7 +64,7 @@ def extract_features(url):
     features['time_domain_expiration'] = -1
     features['file_length'] = 0
 
-     return pd.DataFrame([features])
+     return
 
 def add_banner_and_links():
     # Lista de posibles rutas para el banner
