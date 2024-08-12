@@ -130,7 +130,7 @@ def add_banner_and_links():
     # Botón de GitHub
     with col1:
         github_html = f"""
-        <a href="https://github.com/Pablodeharo" target="_blank">
+        <a href="https://github.com/Pablodeharo/Phishing-Domain-Detection" target="_blank">
             <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30" height="30">
             GitHub
         </a>
