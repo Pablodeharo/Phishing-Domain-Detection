@@ -17,11 +17,6 @@ import traceback
 #st.write("Current working directory:", os.getcwd())
 #st.write("Contents of current directory:", os.listdir())
 
-if sys.version_info < (3, 12):
-    import distutils
-else:
-    import setuptools.distutils as distutils
-
 current_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(current_dir, "random_forest_phishing_model.joblib")
 scaler_path = os.path.join(current_dir, "scaler.joblib")
