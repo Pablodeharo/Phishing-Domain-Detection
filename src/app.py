@@ -166,9 +166,9 @@ def main():
         logging.info("Título mostrado")
 
         # Información de depuración
-        st.write("Python version:", sys.version)
-        st.write("Current working directory:", os.getcwd())
-        st.write("Contents of current directory:", os.listdir())
+       # st.write("Python version:", sys.version)
+       # st.write("Current working directory:", os.getcwd())
+       # st.write("Contents of current directory:", os.listdir())
 
         add_banner_and_links()
 
