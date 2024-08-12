@@ -28,4 +28,6 @@ En la era digital actual, el phishing representa una amenaza significativa para 
 
 ## URL Proyecto App
 - https://phishing-domain-detection-jx6dzbwegiqfxt5qroa8df.streamlit.app/
+
+## Perfil Linkedin
 https://www.linkedin.com/in/pablo-de-haro-pishoudt-0871972b6/
